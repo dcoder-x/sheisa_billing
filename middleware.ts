@@ -18,8 +18,34 @@ export async function middleware(request: NextRequest) {
 
   // Subdomain detection
   const hostname = request.headers.get('host') || '';
-  const subdomain = hostname.split('.')[0];
-  const isSubdomain = subdomain && subdomain !== 'www' && subdomain !== 'localhost' && !subdomain.includes(':');
+  const hostWithoutPort = hostname.split(':')[0];
+  const parts = hostWithoutPort.split('.');
+
+  let subdomain = '';
+  let isSubdomain = false;
+
+  const isIpAddress = /^[0-9.]+$/.test(hostWithoutPort);
+
+  if (!isIpAddress) {
+    if (hostWithoutPort === 'localhost') {
+      isSubdomain = false;
+    } else if (hostWithoutPort.endsWith('.localhost')) {
+      subdomain = parts[0];
+      isSubdomain = true;
+    } else if (hostWithoutPort.endsWith('.vercel.app')) {
+      // e.g. tenant.project.vercel.app has 4 parts. project.vercel.app has 3.
+      if (parts.length > 3 && parts[0] !== 'www') {
+        subdomain = parts[0];
+        isSubdomain = true;
+      }
+    } else {
+      // Normal custom domains (shiesa.com vs tenant.shiesa.com)
+      if (parts.length > 2 && parts[0] !== 'www') {
+        subdomain = parts[0];
+        isSubdomain = true;
+      }
+    }
+  }
 
   console.log(`[Middleware] Host: ${hostname}, Subdomain: ${subdomain}, Path: ${pathname}, IsSubdomain: ${isSubdomain}`);
 
