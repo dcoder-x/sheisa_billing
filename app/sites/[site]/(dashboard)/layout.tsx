@@ -22,7 +22,7 @@ export default async function TenantDashboardLayout({
   const subdomain = site;
 
   if (session.forcePasswordReset) {
-    redirect(`/sites/${site}/set-password`);
+    redirect('/set-password');
   }
 
   // We fetch the entity based on subdomain to ensure we show the correct branding/context

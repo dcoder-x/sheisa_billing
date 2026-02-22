@@ -45,7 +45,7 @@ export default function SetPasswordPage() {
       }
 
       toast.success('Password updated successfully');
-      router.push(`/sites/${site}`);
+      router.push('/');
       router.refresh();
     } catch (error: any) {
       toast.error(error.message);

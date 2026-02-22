@@ -597,3 +597,89 @@ export async function sendDeclineEmail(to: string, entityName: string, reason?: 
     `,
   });
 }
+
+export async function sendNewAccountEmail(email: string, fullName: string, tempPassword: string, loginUrl: string) {
+  return sendEmail({
+    to: email,
+    subject: 'Welcome to your new account - Action Required',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            ${getEmailStyles()}
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Welcome to Sheisa Billing</h1>
+            <p>Hello ${fullName},</p>
+            <p>An administrator has created a new sub-account for you.</p>
+            <p>Your temporary password is: <strong>${tempPassword}</strong></p>
+            <p>For your security, you will be required to set a permanent password immediately upon logging in for the first time.</p>
+            <p style="text-align: center;"><a href="${loginUrl}" class="button">Log In Now</a></p>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Sheisa Billing. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  });
+}
+
+export async function sendAccountSuspendedEmail(email: string, fullName: string) {
+  return sendEmail({
+    to: email,
+    subject: 'Account Suspended - Sheisa Billing',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            ${getEmailStyles()}
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Account Suspended</h1>
+            <p>Hello ${fullName},</p>
+            <p>Your Sheisa Billing account has been suspended by an administrator.</p>
+            <p>If you believe this is an error or need more information, please contact your entity administrator.</p>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Sheisa Billing. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  });
+}
+
+export async function sendAccountReactivatedEmail(email: string, fullName: string, loginUrl: string) {
+  return sendEmail({
+    to: email,
+    subject: 'Account Reactivated - Sheisa Billing',
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            ${getEmailStyles()}
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h1>Account Reactivated</h1>
+            <p>Hello ${fullName},</p>
+            <p>Your Sheisa Billing account has been reactivated. You can now log in and access your dashboard.</p>
+            <p style="text-align: center;"><a href="${loginUrl}" class="button">Log In Now</a></p>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Sheisa Billing. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  });
+}

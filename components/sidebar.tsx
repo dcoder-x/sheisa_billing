@@ -64,8 +64,7 @@ export function SidebarContent({ session, className, onNavigate, entity }: Sideb
     tenantNavItems.push(
       { href: '/suppliers', label: 'Suppliers', icon: Users },
       { href: '/reports', label: 'Reports', icon: BarChart3 },
-      { href: '/users', label: 'Users', icon: Users },
-      { href: '/settings', label: 'Settings', icon: Settings }
+      { href: '/users', label: 'Users', icon: Users }
     );
   }
 
@@ -133,19 +132,21 @@ export function SidebarContent({ session, className, onNavigate, entity }: Sideb
 
       {/* Bottom Section */}
       <div className="border-t border-slate-200 p-4 space-y-2">
-        <Link
-          href="/settings"
-          onClick={onNavigate}
-          className={cn(
-            'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
-            pathname === '/settings'
-              ? 'bg-primary/10 text-primary font-medium'
-              : 'text-slate-700 hover:bg-slate-100'
-          )}
-        >
-          <Settings className="w-5 h-5" />
-          <span>Settings</span>
-        </Link>
+        {!isSuperAdmin && (
+          <Link
+            href="/settings"
+            onClick={onNavigate}
+            className={cn(
+              'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors',
+              pathname === '/settings'
+                ? 'bg-primary/10 text-primary font-medium'
+                : 'text-slate-700 hover:bg-slate-100'
+            )}
+          >
+            <Settings className="w-5 h-5" />
+            <span>Settings</span>
+          </Link>
+        )}
 
         <button
           onClick={handleLogout}

@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if registration request already exists
+    // Check if a PENDING registration request already exists
     const whereConditions: any[] = [
       { registrationNumber },
       { email },
@@ -70,29 +70,38 @@ export async function POST(request: NextRequest) {
 
     const existingRequest = await prisma.registrationRequest.findFirst({
       where: {
+        status: 'PENDING',
         OR: whereConditions,
       },
     });
 
     if (existingRequest) {
       return NextResponse.json(
-        { message: 'Registration number, email, or subdomain already registered' },
+        { message: 'A registration request with this number, email, or subdomain is already pending review' },
         { status: 409 }
       );
     }
 
-    // Check if subdomain is taken by an active entity
+    // Check if registration details are taken by an active entity
+    const entityWhereConditions: any[] = [
+      { registrationNumber },
+      { email },
+    ];
     if (subdomain) {
-      const existingEntity = await prisma.entity.findFirst({
-        where: { subdomain: subdomain },
-      });
+      entityWhereConditions.push({ subdomain });
+    }
 
-      if (existingEntity) {
-        return NextResponse.json(
-          { message: 'Subdomain already taken' },
-          { status: 409 }
-        );
-      }
+    const existingEntity = await prisma.entity.findFirst({
+      where: {
+        OR: entityWhereConditions,
+      },
+    });
+
+    if (existingEntity) {
+      return NextResponse.json(
+        { message: 'Registration number, email, or subdomain is already registered to an active workspace' },
+        { status: 409 }
+      );
     }
 
     // Hash password

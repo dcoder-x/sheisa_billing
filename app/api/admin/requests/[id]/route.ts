@@ -43,7 +43,7 @@ export async function PUT(
 
         if (status === 'APPROVED') {
             // Create user from registration request
-            const existingUser = await prisma.user.findUnique({
+            const existingUser = await prisma.user.findFirst({
                 where: { email: registrationRequest.email },
             });
 
@@ -81,7 +81,7 @@ export async function PUT(
                         email: registrationRequest.email,
                         password: registrationRequest.password, // Already hashed
                         fullName: `Admin`, // Default name, or could use entity name
-                        role: 'ENTITY_USER',
+                        role: 'ENTITY_ADMIN',
                         entityId: newEntity.id,
                     },
                 });
