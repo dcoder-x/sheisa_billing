@@ -1,0 +1,273 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ENTITY_ADMIN
+  ENTITY_USER
+}
+
+enum EntityStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum InvoiceStatus {
+  PAID
+  PENDING
+  OVERDUE
+  CANCELLED
+}
+
+enum SupplierStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum ReportType {
+  FINANCIAL
+  COMPLIANCE
+  VENDOR
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+enum TemplateType {
+  PDF
+  IMAGE
+  CUSTOM
+}
+
+enum BulkJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  PAUSED
+  CANCELED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String
+  password  String
+  fullName  String
+  role      UserRole
+  status    UserStatus @default(ACTIVE)
+  forcePasswordReset Boolean @default(false)
+  entityId  String?
+  entity    Entity?  @relation(fields: [entityId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Email must be unique within an entity. SUPER_ADMIN users have null entityId.
+  // Postgres treats NULLs as distinct in unique indexes, so multiple super-admins 
+  // with the same email are theoretically possible — enforce via app logic if needed.
+  @@unique([email, entityId])
+}
+
+model Entity {
+  id                 String    @id @default(cuid())
+  name               String
+  registrationNumber String    @unique
+  email              String
+  phone              String
+  address            String
+  city               String
+  state              String
+  postalCode         String
+  country            String
+  businessType       String
+  logoUrl            String?
+  themeColor         String?
+  subdomain          String?   @unique
+  status             EntityStatus @default(ACTIVE)
+  users              User[]
+  invoices           Invoice[]
+  suppliers          Supplier[]
+  transactions       Transaction[]
+  reports            Report[]
+  templates          InvoiceTemplate[]
+  bulkGenerationJobs BulkGenerationJob[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+
+model InvoiceTemplate {
+  id        String       @id @default(cuid())
+  entityId  String
+  entity    Entity       @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  name      String
+  
+  type      TemplateType @default(CUSTOM)
+  content   String?      @db.Text // Legacy HTML or text content
+  design    Json?        // JSON storage for canvas elements
+  sourceUrl String?      // URL for background PDF/Image
+  fields    Json?        // definition of fields
+  
+  documents Document[]
+
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([entityId])
+}
+
+model Document {
+  id             String            @id @default(cuid())
+  templateId     String
+  template       InvoiceTemplate   @relation(fields: [templateId], references: [id])
+  
+  content        Json              // Filled data
+  pdfUrl         String?           // Final generated URL
+  status         String            @default("PENDING") // PENDING, COMPLETED, FAILED
+  
+  bulkJobId      String?
+  bulkJob        BulkGenerationJob? @relation(fields: [bulkJobId], references: [id])
+  
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([templateId])
+  @@index([bulkJobId])
+}
+
+model BulkGenerationJob {
+  id             String        @id @default(cuid())
+  entityId       String
+  entity         Entity        @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  
+  status         BulkJobStatus     @default(PENDING)
+  totalRows      Int           @default(0)
+  processedRows  Int           @default(0)
+  successCount   Int           @default(0)
+  failureCount   Int           @default(0)
+  
+  resultUrl      String?
+  errorLog       Json?
+  
+  documents      Document[]
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  
+  @@index([entityId])
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  entityId       String
+  entity         Entity        @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  invoiceNumber  String        @unique
+  supplierId     String?
+  supplier       Supplier?     @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  documentId     String?       // Link to the generated Document
+  amount         Float         @default(0)
+  issueDate      DateTime      @default(now())
+  dueDate        DateTime?
+  paymentDate    DateTime?
+  status         InvoiceStatus @default(PENDING)
+  description    String?
+  attachmentUrl  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([entityId])
+}
+
+model Supplier {
+  id          String   @id @default(cuid())
+  entityId    String
+  entity      Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  name        String
+  email       String
+  phone       String
+  address     String
+  bankAccount String?
+  status      SupplierStatus @default(ACTIVE)
+  invoices    Invoice[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([entityId])
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  entityId        String
+  entity          Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  type            TransactionType
+  amount          Float
+  description     String
+  transactionDate DateTime
+  category        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([entityId])
+}
+
+model Report {
+  id           String   @id @default(cuid())
+  entityId     String
+  entity       Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  reportType   ReportType
+  generatedDate DateTime
+  filePath     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([entityId])
+}
+
+model RegistrationRequest {
+  id                 String   @id @default(cuid())
+  entityName         String
+  registrationNumber String   @unique
+  email              String   @unique
+  phone              String
+  address            String
+  city               String
+  state              String
+  postalCode         String
+  country            String
+  businessType       String
+  logoUrl            String?
+  themeColor         String?
+  subdomain          String?   @unique
+  password           String
+  status             RegistrationStatus @default(PENDING)
+  declineReason      String?
+  reviewedBy         String?
+  reviewedAt         DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
