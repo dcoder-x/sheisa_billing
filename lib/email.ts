@@ -508,22 +508,22 @@ export async function sendApprovalEmail(to: string, entityName: string, subdomai
     const host = url.host;
     const protocol = url.protocol;
 
-    // Check if it's localhost or production domain
-    if (host.includes('localhost')) {
+    // Remove any port for checking
+    const hostWithoutPort = host.split(':')[0];
+    const isIpAddress = /^[0-9.]+$/.test(hostWithoutPort);
+
+    if (isIpAddress) {
+      loginUrl = baseUrl; // Fallback
+    } else if (hostWithoutPort === 'localhost') {
       loginUrl = `${protocol}//${subdomain}.${host}`;
     } else {
-      // Assuming standard subdomain structure: subdomain.domain.com
-      // If base is app.domain.com, we want subdomain.domain.com ?? 
-      // Or if base is domain.com, we want subdomain.domain.com
-
-      // Handle cases where base might have 'www' or 'app'
       const parts = host.split('.');
-      if (parts.length > 2) {
-        // e.g. app.domain.com -> replace app with subdomain
+      // If the base URL starts with 'www' or 'app', replace it.
+      if (parts[0] === 'www' || parts[0] === 'app') {
         parts[0] = subdomain;
         loginUrl = `${protocol}//${parts.join('.')}`;
       } else {
-        // e.g. domain.com -> subdomain.domain.com
+        // Prepend the subdomain to the root domain (e.g. sheisa-billing.vercel.app -> entity.sheisa-billing.vercel.app)
         loginUrl = `${protocol}//${subdomain}.${host}`;
       }
     }
