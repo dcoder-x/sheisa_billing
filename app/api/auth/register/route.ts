@@ -132,8 +132,24 @@ export async function POST(request: NextRequest) {
       { message: 'Registration request submitted successfully', id: registrationRequest.id },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error);
+
+    if (error?.code === 'P2002') {
+      const target = error.meta?.target as string[] | string || [];
+      let fields = Array.isArray(target) ? target.join(', ') : target;
+
+      // Make internal database field names human-readable
+      if (fields.includes('registrationNumber')) fields = 'Registration Number';
+      if (fields.includes('email')) fields = 'Email Address';
+      if (fields.includes('subdomain')) fields = 'Workspace Subdomain';
+
+      return NextResponse.json(
+        { message: `An application with this ${fields || 'data'} already exists. Please verify your information and try again.` },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

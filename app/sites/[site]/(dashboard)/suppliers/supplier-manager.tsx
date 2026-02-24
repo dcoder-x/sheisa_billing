@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Papa from 'papaparse';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -23,7 +24,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Plus, MoreHorizontal, Loader2 } from 'lucide-react';
+import { Plus, MoreHorizontal, Loader2, UploadCloud } from 'lucide-react';
 import { toast } from 'sonner';
 import { SearchInput } from '@/components/ui/search-input';
 import { PaginationControls } from '@/components/ui/pagination-controls';
@@ -56,6 +57,73 @@ export function SupplierManager({ initialSuppliers, totalItems, pageSize }: Supp
     bankAccount: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results: any) => {
+        try {
+          // Map to expected fields based on CSV headers (flexible)
+          const parsedSuppliers = results.data.map((row: any) => {
+             // Try to find columns case-insensitively
+             const getField = (keys: string[]) => {
+                const key = Object.keys(row).find(k => keys.includes(k.toLowerCase().trim()));
+                return key ? row[key] : '';
+             };
+
+             return {
+               name: getField(['name', 'supplier name', 'company', 'company name']),
+               email: getField(['email', 'email address']),
+               phone: getField(['phone', 'phone number', 'contact']),
+               address: getField(['address', 'billing address']),
+               bankAccount: getField(['bank account', 'account', 'bank']),
+             };
+          }).filter((s: any) => s.name && s.email);
+
+          if (parsedSuppliers.length === 0) {
+            toast.error('No valid suppliers found. Please ensure your CSV has Name and Email columns.');
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+            return;
+          }
+
+          const res = await fetch('/api/suppliers/bulk', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ suppliers: parsedSuppliers }),
+          });
+
+          if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || 'Failed to import suppliers');
+          }
+
+          const data = await res.json();
+          toast.success(data.message || `Successfully imported ${parsedSuppliers.length} suppliers!`);
+          router.refresh();
+        } catch (error: any) {
+          console.error('Import error:', error);
+          toast.error(error.message || 'An error occurred during import');
+        } finally {
+          setIsUploading(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+      },
+      error: (error: Error) => {
+        console.error('PapaParse error:', error);
+        toast.error('Failed to parse the CSV file.');
+        setIsUploading(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    });
+  };
 
   const handleAddSupplier = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,9 +163,93 @@ export function SupplierManager({ initialSuppliers, totalItems, pageSize }: Supp
           <h1 className="text-3xl font-bold text-slate-900">Suppliers</h1>
           <p className="text-slate-600 mt-2">Manage your supplier relationships</p>
         </div>
-        <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2">
+        <div className="flex gap-3">
+          <input 
+            type="file" 
+            accept=".csv" 
+            className="hidden" 
+            ref={fileInputRef} 
+            onChange={handleFileUpload} 
+          />
+          {/* CSV Import Dialog */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                className="gap-2" 
+                disabled={isUploading}
+              >
+                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <UploadCloud className="w-4 h-4" />}
+                Import CSV
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[550px]">
+              <DialogHeader>
+                <DialogTitle>Import Suppliers from CSV</DialogTitle>
+                <DialogDescription>
+                  Upload a CSV file to bulk import suppliers. Your file must include a header row with the exact column names below.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="py-4 space-y-4">
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 text-slate-800">Required Fields:</h4>
+                  <p className="text-sm text-slate-600 mb-2">
+                    <code className="bg-slate-100 px-1 py-0.5 rounded text-primary">name</code> (Required)<br/>
+                    <code className="bg-slate-100 px-1 py-0.5 rounded text-primary">email</code> (Optional)<br/>
+                    <code className="bg-slate-100 px-1 py-0.5 rounded text-primary">phone</code> (Optional)<br/>
+                    <code className="bg-slate-100 px-1 py-0.5 rounded text-primary">status</code> (Optional, defaults to ACTIVE. Valid values: ACTIVE, INACTIVE)
+                  </p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold text-sm mb-2 text-slate-800">Example CSV Format:</h4>
+                  <div className="bg-slate-50 border border-slate-200 rounded-md overflow-x-auto">
+                    <table className="w-full text-sm text-left text-slate-600">
+                      <thead className="bg-slate-100 text-slate-700 font-mono text-xs">
+                        <tr>
+                          <th className="px-3 py-2 border-b">name</th>
+                          <th className="px-3 py-2 border-b">email</th>
+                          <th className="px-3 py-2 border-b">phone</th>
+                          <th className="px-3 py-2 border-b">status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="font-mono text-xs">
+                        <tr>
+                          <td className="px-3 py-2 border-b">Acme Corp</td>
+                          <td className="px-3 py-2 border-b">billing@acmecorp.com</td>
+                          <td className="px-3 py-2 border-b">+1-555-0198</td>
+                          <td className="px-3 py-2 border-b">ACTIVE</td>
+                        </tr>
+                        <tr>
+                          <td className="px-3 py-2">Global Supplies</td>
+                          <td className="px-3 py-2">info@globalsup.net</td>
+                          <td className="px-3 py-2"></td>
+                          <td className="px-3 py-2"></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                  <Button variant="outline" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="gap-2"
+                  >
+                    Select CSV File
+                  </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2">
               <Plus className="w-4 h-4" />
               Add Supplier
             </Button>
@@ -168,6 +320,7 @@ export function SupplierManager({ initialSuppliers, totalItems, pageSize }: Supp
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card className="bg-white border-slate-200">

@@ -1,53 +1,45 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Loader2 } from 'lucide-react';
 
-const invoices = [
-  {
-    id: '#100F950',
-    price: '$250',
-    date: '17 Set 2025, 8:45 am',
-    status: 'Paid',
-    statusColor: 'bg-green-50 text-green-700',
-  },
-  {
-    id: '#100F522',
-    price: '$12,780',
-    date: '16 Set 2025, 11:30 pm',
-    status: 'Pending',
-    statusColor: 'bg-orange-50 text-orange-700',
-  },
-  {
-    id: '#100F98F',
-    price: '$740',
-    date: '14 Set 2025, 2:00 am',
-    status: 'Paid',
-    statusColor: 'bg-green-50 text-green-700',
-  },
-  {
-    id: '#100F98F',
-    price: '$740',
-    date: '14 Set 2025, 2:00 am',
-    status: 'Paid',
-    statusColor: 'bg-green-50 text-green-700',
-  },
-  {
-    id: '#100DF40',
-    price: '$17,890',
-    date: '09 Set 2025, 4:30 pm',
-    status: 'Cancel',
-    statusColor: 'bg-red-50 text-red-700',
-  },
-];
+interface InvoiceData {
+  id: string;
+  price: string;
+  date: string;
+  status: string;
+  statusColor: string;
+}
 
 export function InvoicesTable() {
+  const [invoices, setInvoices] = useState<InvoiceData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecent = async () => {
+      try {
+        const res = await fetch('/api/invoices/recent');
+        if (res.ok) {
+          const data = await res.json();
+          setInvoices(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch recent invoices', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecent();
+  }, []);
+
   return (
     <Card className="bg-white border-slate-200">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Recent Orders</CardTitle>
+          <CardTitle>Recent Invoices</CardTitle>
           <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
             Week ▼
           </button>
@@ -66,7 +58,19 @@ export function InvoicesTable() {
               </tr>
             </thead>
             <tbody>
-              {invoices.map((invoice, index) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center">
+                     <Loader2 className="w-6 h-6 animate-spin mx-auto text-slate-400" />
+                  </td>
+                </tr>
+              ) : invoices.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-slate-500">
+                     No recent invoices found.
+                  </td>
+                </tr>
+              ) : invoices.map((invoice, index) => (
                 <tr key={index} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="py-3 px-2 text-slate-900 font-medium">{invoice.id}</td>
                   <td className="py-3 px-2 text-green-600 font-medium">{invoice.price}</td>
