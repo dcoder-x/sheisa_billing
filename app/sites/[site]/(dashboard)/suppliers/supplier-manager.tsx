@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Papa from 'papaparse';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +48,7 @@ interface SupplierManagerProps {
 
 export function SupplierManager({ initialSuppliers, totalItems, pageSize }: SupplierManagerProps) {
   const router = useRouter();
+  const { site } = useParams() as { site: string };
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newSupplier, setNewSupplier] = useState({
     name: '',
@@ -157,13 +158,13 @@ export function SupplierManager({ initialSuppliers, totalItems, pageSize }: Supp
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Suppliers</h1>
-          <p className="text-slate-600 mt-2">Manage your supplier relationships</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Suppliers</h1>
+          <p className="text-slate-600 mt-1 md:mt-2 text-sm md:text-base">Manage your supplier relationships</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <input 
             type="file" 
             accept=".csv" 
@@ -369,8 +370,10 @@ export function SupplierManager({ initialSuppliers, totalItems, pageSize }: Supp
                         </TableCell>
                         <TableCell>{supplier._count?.invoices || 0}</TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="w-4 h-4 text-slate-600" />
+                          <Button variant="ghost" size="sm" asChild className="h-8 text-blue-600 hover:text-blue-800">
+                            <a href={`/sites/${site}/suppliers/${supplier.id}`}>
+                              View Profile
+                            </a>
                           </Button>
                         </TableCell>
                       </TableRow>

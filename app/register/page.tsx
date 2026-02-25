@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUploader } from '@/components/ui/file-uploader';
+import { LanguageSelector } from '@/components/language-selector';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -107,8 +108,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-4 relative">
+      {/* Global Language Selector Overlay */}
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSelector />
+      </div>
+      
+      <Card className="w-full max-w-2xl shadow-lg mt-12 md:mt-0">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Register Your Entity</CardTitle>
           <CardDescription className="text-center">

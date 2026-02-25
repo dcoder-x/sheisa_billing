@@ -5,22 +5,46 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
     const session = await getSession();
-    if (!session || !session.userId) {
+    if (!session || !session.userId || !session.entityId) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
     try {
+        const contentType = request.headers.get('content-type') || '';
+
+        // Handle new standard invoice JSON flow
+        if (contentType.includes('application/json')) {
+            const body = await request.json();
+            const { isStandardInvoice, rows } = body;
+
+            if (!rows || rows.length === 0) {
+                return NextResponse.json({ message: 'Missing rows array' }, { status: 400 });
+            }
+
+            const job = await bulkGenerationService.startBulkGeneration({
+                userId: session.userId,
+                entityId: session.entityId,
+                rows,
+                isStandardInvoice: true,
+                notifyEmail: session.email
+            });
+
+            return NextResponse.json({ success: true, data: job }, { status: 201 });
+        }
+
+        // Handling legacy template FormData flow
         const formData = await request.formData();
-        const templateId = formData.get('templateId') as string;
+        const templateId = formData.get('templateId') as string | null;
         const csvFile = formData.get('csv') as File;
 
-        if (!templateId || !csvFile) {
-            return NextResponse.json({ message: 'Missing templateId or csv file' }, { status: 400 });
+        if (!csvFile) {
+            return NextResponse.json({ message: 'Missing csv file' }, { status: 400 });
         }
 
         const job = await bulkGenerationService.startBulkGeneration({
             userId: session.userId,
-            templateId,
+            entityId: session.entityId,
+            templateId: templateId || undefined,
             csvData: csvFile,
             notifyEmail: session.email
         });

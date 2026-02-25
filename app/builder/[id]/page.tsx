@@ -23,7 +23,7 @@ export default async function BuilderPage(props: PageProps) {
 
   // Verify template exists and belongs to organization (if applicable)
   // For now just check existence
-  const template = await prisma.template.findUnique({
+  const template = await prisma.invoiceTemplate.findUnique({
     where: { id },
   });
 

@@ -153,7 +153,7 @@ export function TemplateBuilder({ type, templateId, onBack }: TemplateBuilderPro
       if (!currentTemplateId || fields.length === 0 || !sourceFile) return
       
       // Skip auto-save if there are duplicate field labels
-      const labels = fields.map(f => (f.label || f.properties?.label || '').trim().toLowerCase()).filter(Boolean)
+      const labels = fields.map(f => (f.label || (f as any).properties?.label || '').trim().toLowerCase()).filter(Boolean)
       const hasDuplicates = labels.some((l, i) => labels.indexOf(l) !== i)
       if (hasDuplicates) return
       

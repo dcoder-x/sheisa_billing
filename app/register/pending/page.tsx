@@ -2,11 +2,16 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2 } from 'lucide-react';
+import { LanguageSelector } from '@/components/language-selector';
 
 export default function PendingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg text-center">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex items-center justify-center p-4 relative">
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSelector />
+      </div>
+      
+      <Card className="w-full max-w-md shadow-lg text-center mt-12 md:mt-0">
         <CardHeader>
           <div className="flex justify-center mb-4">
             <CheckCircle2 className="w-16 h-16 text-green-600" />

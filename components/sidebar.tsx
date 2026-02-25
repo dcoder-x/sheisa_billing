@@ -57,7 +57,7 @@ export function SidebarContent({ session, className, onNavigate, entity }: Sideb
   const tenantNavItems = [
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/invoices', label: 'Invoices', icon: FileText },
-    { href: '/invoices/templates', label: 'Templates', icon: StickyNote },
+    { href: '/invoices/generate', label: 'Bulk Generate', icon: StickyNote },
   ];
 
   if (isEntityAdmin) {

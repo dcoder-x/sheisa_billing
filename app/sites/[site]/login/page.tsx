@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { LoginForm } from './login-form';
+import { LanguageSelector } from '@/components/language-selector';
 
 export default async function TenantLoginPage({ params }: { params: Promise<{ site: string }> }) {
   const { site } = await params;
@@ -50,7 +51,10 @@ export default async function TenantLoginPage({ params }: { params: Promise<{ si
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex items-center justify-center p-8 bg-slate-50">
+      <div className="flex items-center justify-center p-8 bg-slate-50 relative">
+        <div className="absolute top-6 right-6">
+          <LanguageSelector />
+        </div>
         <LoginForm subdomain={subdomain} />
       </div>
     </div>

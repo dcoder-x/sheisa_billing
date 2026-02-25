@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getSession();
@@ -16,8 +16,10 @@ export async function POST(
       );
     }
 
+    const { id } = await context.params;
+
     const registrationRequest = await prisma.registrationRequest.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!registrationRequest) {
@@ -60,7 +62,7 @@ export async function POST(
 
     // Update registration request
     await prisma.registrationRequest.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         status: 'APPROVED',
         reviewedBy: session.userId,

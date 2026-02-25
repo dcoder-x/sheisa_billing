@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Session } from '@/lib/auth';
 import { Bell, Search, Menu } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'; // Added SheetTitle import
 import { SidebarContent } from '@/components/sidebar';
 import * as VisuallyHidden from '@radix-ui/react-visually-hidden';
+import { LanguageSelector } from '@/components/language-selector';
 
 
 interface HeaderProps {
@@ -23,30 +24,6 @@ interface HeaderProps {
 
 export function Header({ session, title, entity }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState('en');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('auto_translate_lang');
-    if (saved) setCurrentLang(saved);
-  }, []);
-
-  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const lang = e.target.value;
-      setCurrentLang(lang);
-      localStorage.setItem('auto_translate_lang', lang);
-      
-      if (lang === 'en') {
-          // Clear translation back to defaults
-          document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
-      } else {
-          // Force Google Translate via cookie
-          document.cookie = `googtrans=/en/${lang}; path=/`;
-          document.cookie = `googtrans=/en/${lang}; path=/; domain=${window.location.hostname}`;
-      }
-      
-      window.location.reload();
-  };
 
   const initials = session?.fullName
     ?.split(' ')
@@ -93,28 +70,10 @@ export function Header({ session, title, entity }: HeaderProps) {
         </div>
 
         {/* Right: Language, Notifications and Profile */}
-        <div className="flex items-center gap-4 ml-auto">
+        <div className="flex items-center gap-2 md:gap-4 ml-auto">
           
           {/* Custom Language Selector */}
-          <select 
-            value={currentLang}
-            onChange={handleLanguageChange}
-            className="hidden md:block bg-slate-50 border border-slate-200 text-slate-600 text-sm rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary cursor-pointer"
-          >
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="pt">Português</option>
-            <option value="fr">Français</option>
-            <option value="de">Deutsch</option>
-            <option value="it">Italiano</option>
-            <option value="nl">Nederlands</option>
-            <option value="ru">Русский</option>
-            <option value="zh-CN">中文</option>
-            <option value="ja">日本語</option>
-            <option value="ko">한국어</option>
-            <option value="hi">हिन्दी</option>
-            <option value="ar">العربية</option>
-          </select>
+          <LanguageSelector />
 
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="w-5 h-5 text-slate-600" />

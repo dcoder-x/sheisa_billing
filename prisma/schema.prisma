@@ -140,8 +140,8 @@ model InvoiceTemplate {
 
 model Document {
   id             String            @id @default(cuid())
-  templateId     String
-  template       InvoiceTemplate   @relation(fields: [templateId], references: [id])
+  templateId     String?
+  template       InvoiceTemplate?  @relation(fields: [templateId], references: [id])
   
   content        Json              // Filled data
   pdfUrl         String?           // Final generated URL

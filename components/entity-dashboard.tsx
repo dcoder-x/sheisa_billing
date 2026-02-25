@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, Loader2 } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Loader2, FileUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { InvoicesTable } from './invoices-table';
 
 interface KPICard {
@@ -47,6 +49,19 @@ export function EntityDashboard() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Dashboard Overview</h1>
+          <p className="text-sm text-slate-500 mt-1">Monitor your billing and generate new invoices.</p>
+        </div>
+        <Button asChild className="bg-blue-600 hover:bg-blue-700 gap-2">
+          <Link href="/invoices/generate">
+            <FileUp className="w-4 h-4" />
+            Bulk Generate Invoices
+          </Link>
+        </Button>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {kpiData.map((kpi, index) => (

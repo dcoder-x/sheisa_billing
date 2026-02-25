@@ -1,0 +1,48 @@
+.next/dev/types/validator.ts(405,31): error TS2344: Type 'typeof import("C:/Users/user/Downloads/shiesa-billing-system/app/api/invoices/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/invoices/[id]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(request: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ entityId: string; status: InvoiceStatus; id: string; ... 10 more ...; attachmentUrl: string | null; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(432,31): error TS2344: Type 'typeof import("C:/Users/user/Downloads/shiesa-billing-system/app/api/registration-requests/[id]/approve/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/registration-requests/[id]/approve">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ message: string; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/dev/types/validator.ts(441,31): error TS2344: Type 'typeof import("C:/Users/user/Downloads/shiesa-billing-system/app/api/registration-requests/[id]/decline/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/registration-requests/[id]/decline">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ message: string; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(396,31): error TS2344: Type 'typeof import("C:/Users/user/Downloads/shiesa-billing-system/app/api/invoices/[id]/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/invoices/[id]">'.
+  Types of property 'PATCH' are incompatible.
+    Type '(request: Request, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ error: string; }> | NextResponse<{ entityId: string; status: InvoiceStatus; id: string; ... 10 more ...; attachmentUrl: string | null; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(423,31): error TS2344: Type 'typeof import("C:/Users/user/Downloads/shiesa-billing-system/app/api/registration-requests/[id]/approve/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/registration-requests/[id]/approve">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ message: string; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+.next/types/validator.ts(432,31): error TS2344: Type 'typeof import("C:/Users/user/Downloads/shiesa-billing-system/app/api/registration-requests/[id]/decline/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/registration-requests/[id]/decline">'.
+  Types of property 'POST' are incompatible.
+    Type '(request: NextRequest, { params }: { params: { id: string; }; }) => Promise<NextResponse<{ message: string; }>>' is not assignable to type '(request: NextRequest, context: { params: Promise<{ id: string; }>; }) => void | Response | Promise<void | Response>'.
+      Types of parameters '__1' and 'context' are incompatible.
+        Type '{ params: Promise<{ id: string; }>; }' is not assignable to type '{ params: { id: string; }; }'.
+          Types of property 'params' are incompatible.
+            Property 'id' is missing in type 'Promise<{ id: string; }>' but required in type '{ id: string; }'.
+app/api/invoices/bulk-generate/route.ts(96,32): error TS18047: 'emailContent' is possibly 'null'.
+app/api/invoices/bulk-generate/route.ts(105,71): error TS2339: Property 'user' does not exist on type 'Session'.
+app/builder/[id]/page.tsx(26,33): error TS2339: Property 'template' does not exist on type 'PrismaClient<PrismaClientOptions, never, DefaultArgs>'.
+app/sites/[site]/(dashboard)/suppliers/supplier-manager.tsx(5,18): error TS7016: Could not find a declaration file for module 'papaparse'. 'C:/Users/user/Downloads/shiesa-billing-system/node_modules/papaparse/papaparse.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/papaparse` if it exists or add a new declaration (.d.ts) file containing `declare module 'papaparse';`
+components/template-builder/template-builder.tsx(156,52): error TS2339: Property 'properties' does not exist on type 'DataField'.

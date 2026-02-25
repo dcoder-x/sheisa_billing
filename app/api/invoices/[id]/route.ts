@@ -4,7 +4,7 @@ import { getSession } from '@/lib/auth';
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
     try {
         const session = await getSession();
@@ -12,7 +12,7 @@ export async function PATCH(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = await context.params;
         const body = await request.json();
         const { status } = body;
 
