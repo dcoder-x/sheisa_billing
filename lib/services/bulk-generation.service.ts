@@ -299,8 +299,24 @@ export class BulkGenerationService {
         }
 
         let template = null;
+        let systemTemplateId: string | undefined;
+
         if (templateId) {
             template = await prisma.invoiceTemplate.findUnique({ where: { id: templateId } });
+        } else {
+            let sys = await prisma.invoiceTemplate.findFirst({
+                where: { entityId, name: 'Standard Invoice (System)' }
+            });
+            if (!sys) {
+                sys = await prisma.invoiceTemplate.create({
+                    data: {
+                        entityId,
+                        name: 'Standard Invoice (System)',
+                        type: 'CUSTOM'
+                    }
+                });
+            }
+            systemTemplateId = sys.id;
         }
 
         const errors: any[] = []
@@ -375,6 +391,7 @@ export class BulkGenerationService {
 
                     const doc = await prisma.document.create({
                         data: {
+                            template: { connect: { id: systemTemplateId } },
                             content: row,
                             status: 'completed',
                             bulkJob: { connect: { id: jobId } }
