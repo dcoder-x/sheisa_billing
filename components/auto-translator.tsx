@@ -27,6 +27,33 @@ export function AutoTranslator() {
 
   // Handle Next.js soft navigation (client-side routing)
   useEffect(() => {
+    // Patch DOM to prevent React hydration errors with Google Translate
+    if (typeof window !== 'undefined' && typeof Node === 'function' && Node.prototype) {
+      const originalRemoveChild = Node.prototype.removeChild;
+      Node.prototype.removeChild = function (child: Node) {
+        if (child.parentNode !== this) {
+          if (console) {
+            console.warn('Cannot remove a child from a different parent', child, this);
+          }
+          return child;
+        }
+        return originalRemoveChild.apply(this, arguments as any);
+      } as any;
+
+      const originalInsertBefore = Node.prototype.insertBefore;
+      Node.prototype.insertBefore = function (newNode: Node, referenceNode: Node | null) {
+        if (referenceNode && referenceNode.parentNode !== this) {
+          if (console) {
+            console.warn('Cannot insert before a reference node from a different parent', referenceNode, this);
+          }
+          return newNode;
+        }
+        return originalInsertBefore.apply(this, arguments as any);
+      } as any;
+    }
+  }, []);
+
+  useEffect(() => {
      const savedLang = localStorage.getItem('auto_translate_lang');
      if (savedLang && savedLang !== 'en') {
        // Wait for React to finish hydrating the new page's DOM elements
