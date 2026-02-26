@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
             return {
                 id: inv.invoiceNumber,
-                price: `$${inv.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                price: new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(inv.amount),
                 date: new Date(inv.createdAt).toLocaleString('en-US', {
                     day: '2-digit',
                     month: 'short',

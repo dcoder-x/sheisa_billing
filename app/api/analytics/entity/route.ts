@@ -166,12 +166,14 @@ export async function GET(request: NextRequest) {
             });
         }
 
+        const formatCurrency = (val: number) => new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(val);
+
         return NextResponse.json({
             kpi: [
-                { title: 'This Month Expenses', value: `$${currentMonthExpense.toLocaleString()}`, change: '0%', isPositive: false }, // Simplified change
-                { title: 'Pending Invoices', value: `$${pendingAmount.toLocaleString()}`, count: pendingCount, change: '', isPositive: false },
+                { title: 'This Month Expenses', value: formatCurrency(currentMonthExpense), change: '0%', isPositive: false }, // Simplified change
+                { title: 'Pending Invoices', value: formatCurrency(pendingAmount), count: pendingCount, change: '', isPositive: false },
                 { title: 'Total Suppliers', value: suppliersCount.toString(), change: '', isPositive: true },
-                { title: 'This Month Income', value: `$${currentMonthIncome.toLocaleString()}`, change: '0%', isPositive: true },
+                { title: 'This Month Income', value: formatCurrency(currentMonthIncome), change: '0%', isPositive: true },
             ],
             chartData
         });

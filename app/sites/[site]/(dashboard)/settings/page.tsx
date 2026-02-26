@@ -18,7 +18,7 @@ export default async function SettingsPage() {
   if (session.entityId) {
     entity = await prisma.entity.findUnique({
       where: { id: session.entityId },
-      select: { id: true, name: true, logoUrl: true, themeColor: true }
+      select: { id: true, name: true, email: true, logoUrl: true, themeColor: true }
     });
   }
 

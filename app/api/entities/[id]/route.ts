@@ -22,6 +22,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
         if (data.themeColor !== undefined) updateData.themeColor = data.themeColor;
         if (data.logoUrl !== undefined) updateData.logoUrl = data.logoUrl;
+        if (data.email !== undefined) updateData.email = data.email;
 
         if (Object.keys(updateData).length === 0) {
             return NextResponse.json({ message: 'No fields to update' }, { status: 400 });

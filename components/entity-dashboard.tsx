@@ -140,7 +140,7 @@ export function EntityDashboard() {
             <div>
               <p className="text-sm text-slate-600">Pending Invoices</p>
               <p className="text-xl font-bold text-slate-900">
-                {kpiData.find(k => k.title === 'Pending Invoices')?.value || '$0'}
+                {kpiData.find(k => k.title === 'Pending Invoices')?.value || '0,00 Kz'}
               </p>
             </div>
             <div className="h-px bg-slate-200"></div>

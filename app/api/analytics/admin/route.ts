@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
             kpi: [
                 { title: 'Total Entities', value: totalEntities.toString(), change: '', isPositive: true },
                 { title: 'Pending Requests', value: pendingRequests.toString(), change: '', isPositive: false },
-                { title: 'System Volume', value: `$${volume.toLocaleString()}`, change: '', isPositive: true },
+                { title: 'System Volume', value: new Intl.NumberFormat('pt-AO', { style: 'currency', currency: 'AOA' }).format(volume), change: '', isPositive: true },
                 { title: 'Total Users', value: totalUsers.toString(), change: '', isPositive: true },
             ],
             // Distribution of Entities by Business Type

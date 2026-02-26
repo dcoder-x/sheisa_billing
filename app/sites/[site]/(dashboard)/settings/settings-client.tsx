@@ -15,6 +15,7 @@ interface SettingsClientProps {
   entity: {
     id: string;
     name: string;
+    email: string;
     logoUrl: string | null;
     themeColor: string | null;
   } | null;
@@ -32,6 +33,10 @@ export function SettingsClient({ session, entity }: SettingsClientProps) {
   // Entity Branding State
   const [themeColor, setThemeColor] = useState(entity?.themeColor || '#2563eb');
   const [isUpdatingBranding, setIsUpdatingBranding] = useState(false);
+
+  // Entity Details State
+  const [email, setEmail] = useState(entity?.email || '');
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
 
   const isEntityAdmin = session.role === 'ENTITY_ADMIN';
 
@@ -88,6 +93,28 @@ export function SettingsClient({ session, entity }: SettingsClientProps) {
       toast.error('Failed to update brand color');
     } finally {
       setIsUpdatingBranding(false);
+    }
+  };
+
+  const handleEmailUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isEntityAdmin) return;
+    
+    setIsUpdatingEmail(true);
+    try {
+      const res = await fetch(`/api/entities/${entity?.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!res.ok) throw new Error('Failed to update email');
+      toast.success('Entity email updated successfully');
+      router.refresh();
+    } catch (error) {
+      toast.error('Failed to update entity email');
+    } finally {
+      setIsUpdatingEmail(false);
     }
   };
 
@@ -206,6 +233,36 @@ export function SettingsClient({ session, entity }: SettingsClientProps) {
           </form>
         </CardContent>
       </Card>
+
+      {/* Entity Settings (Admins Only) */}
+      {isEntityAdmin && entity && (
+        <Card className="bg-white border-slate-200">
+          <CardHeader>
+            <CardTitle>Entity Settings</CardTitle>
+            <CardDescription>Update your entity's core settings</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleEmailUpdate} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="entityEmail" className="text-slate-700 font-medium">Notification Email</Label>
+                <Input 
+                  id="entityEmail" 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  className="border-slate-200 bg-white" 
+                  placeholder="hello@entity.com"
+                  required
+                />
+                <p className="text-sm text-slate-500">This email will receive entity notifications, including bulk generation updates.</p>
+              </div>
+              <Button type="submit" disabled={isUpdatingEmail} className="bg-slate-900 border text-white hover:bg-slate-800">
+                {isUpdatingEmail ? <><Loader2 className="w-4 h-4 mr-2 animate-spin"/> Saving...</> : 'Save Email'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Entity Branding (Admins Only) */}
       {isEntityAdmin && entity && (
