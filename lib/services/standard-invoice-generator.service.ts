@@ -72,6 +72,28 @@ export class StandardInvoiceGeneratorService {
         });
     }
 
+    private splitTextIntoLines(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
+        if (!text) return [];
+        const words = text.split(' ');
+        const lines: string[] = [];
+        let currentLine = words[0] || '';
+
+        for (let i = 1; i < words.length; i++) {
+            const word = words[i];
+            const width = font.widthOfTextAtSize(currentLine + ' ' + word, size);
+            if (width <= maxWidth) {
+                currentLine += ' ' + word;
+            } else {
+                lines.push(currentLine);
+                currentLine = word;
+            }
+        }
+        if (currentLine) {
+            lines.push(currentLine);
+        }
+        return lines;
+    }
+
     async generate(data: StandardInvoiceData): Promise<string> {
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage([595.28, 841.89]); // A4
@@ -84,31 +106,44 @@ export class StandardInvoiceGeneratorService {
         let currentY = height - 50;
 
         // --- Header Section ---
-        // Left: Entity Info
         currentY -= 60; // Leave space for Logo
 
-        // Entity Name
-        this.drawTextValue(page, data.entity.name || 'Zito Andrade Cassange Comercial', boldFont, 10, 50, currentY);
-        currentY -= 12;
-        this.drawTextValue(page, data.entity.address || 'Rua Marien Ngouabi, Casa n° 54-A - Maianga - Luanda', regularFont, 9, 50, currentY);
-        currentY -= 12;
-        this.drawTextValue(page, `Tel: ${data.entity.phone || '(244) 923959316'}`, regularFont, 9, 50, currentY);
-        currentY -= 12;
-        this.drawTextValue(page, `E-mail: ${data.entity.email || 'cassangezitoandrade@gmail.com'}`, regularFont, 9, 50, currentY);
-        currentY -= 12;
-        this.drawTextValue(page, `Contribuinte: ${data.entity.registrationNumber || '001532176ME033'}`, regularFont, 9, 50, currentY);
+        const headerStartY = currentY;
 
-        // Right: Client Info
-        let rightY = height - 120;
-        this.drawTextValue(page, 'Exmo.(s) Sr(s)', regularFont, 9, 350, rightY);
-        rightY -= 12;
-        this.drawTextValue(page, data.clientName.toUpperCase(), boldFont, 10, 350, rightY);
+        // Left: Client Info
+        let clientLeftY = headerStartY - 10;
+        this.drawTextValue(page, 'Exmo.(s) Sr(s)', regularFont, 9, 50, clientLeftY);
+        clientLeftY -= 12;
+        this.drawTextValue(page, data.clientName.toUpperCase(), boldFont, 10, 50, clientLeftY);
         if (data.clientAddress) {
-            rightY -= 12;
-            this.drawTextValue(page, data.clientAddress.toUpperCase(), regularFont, 9, 350, rightY);
+            clientLeftY -= 12;
+            const addressLines = this.splitTextIntoLines(data.clientAddress.toUpperCase(), regularFont, 9, 290);
+            for (const line of addressLines) {
+                this.drawTextValue(page, line, regularFont, 9, 50, clientLeftY);
+                clientLeftY -= 12;
+            }
+            clientLeftY += 12; // Compensate for last extra subtraction
         }
 
-        currentY -= 30;
+        // Right: Entity Info
+        let rightY = headerStartY;
+        this.drawTextValue(page, data.entity.name || 'Zito Andrade Cassange Comercial', boldFont, 10, 350, rightY);
+        rightY -= 12;
+
+        const entityAddrStr = data.entity.address || 'Rua Marien Ngouabi, Casa n° 54-A - Maianga - Luanda';
+        const entityAddrLines = this.splitTextIntoLines(entityAddrStr, regularFont, 9, 195);
+        for (const line of entityAddrLines) {
+            this.drawTextValue(page, line, regularFont, 9, 350, rightY);
+            rightY -= 12;
+        }
+
+        this.drawTextValue(page, `Tel: ${data.entity.phone || '(244) 923959316'}`, regularFont, 9, 350, rightY);
+        rightY -= 12;
+        this.drawTextValue(page, `E-mail: ${data.entity.email || 'cassangezitoandrade@gmail.com'}`, regularFont, 9, 350, rightY);
+        rightY -= 12;
+        this.drawTextValue(page, `Contribuinte: ${data.entity.registrationNumber || '001532176ME033'}`, regularFont, 9, 350, rightY);
+
+        currentY = Math.min(clientLeftY, rightY) - 30;
 
         // --- Document Title ---
         this.drawTextValue(page, 'Original', regularFont, 9, 50, currentY);
@@ -152,7 +187,7 @@ export class StandardInvoiceGeneratorService {
 
         // --- Items Table Title ---
         const itemHeaders = ['Código', 'Descrição', 'Preço Uni.', 'Qtd.', 'Taxa/IVA %', 'Desc. %', 'Total'];
-        const itemX = [50, 130, 360, 400, 460, 500, 545]; // Total right aligned at 545
+        const itemX = [50, 110, 305, 350, 410, 460, 545]; // Total right aligned at 545
         const itemAlign = ['left', 'left', 'right', 'right', 'right', 'right', 'right'] as any;
 
         page.drawLine({
