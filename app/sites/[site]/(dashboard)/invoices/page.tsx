@@ -128,12 +128,12 @@ export default async function InvoicesPage({
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-1">
                             {invoice.attachmentUrl && (
-                              <Link href={invoice.attachmentUrl} target="_blank">
+                              <a href={invoice.attachmentUrl} target="_blank" download>
                                 <Button variant="ghost" size="sm" className="h-8 px-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700">
                                   <Download className="w-4 h-4 mr-1.5" />
                                   <span className="text-xs">Download</span>
                                 </Button>
-                              </Link>
+                              </a>
                             )}
                           </div>
                         </td>

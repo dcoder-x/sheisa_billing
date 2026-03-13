@@ -23,8 +23,25 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Validate basic fields for all suppliers
-        const validSuppliers = suppliers.filter(s => s.name && s.email).map(s => ({
+        const validSuppliersRaw = suppliers.filter(s => s.name && s.email);
+
+        const existingSuppliers = await prisma.supplier.findMany({
+            where: {
+                entityId: session.entityId,
+                email: { in: validSuppliersRaw.map(s => s.email) }
+            },
+            select: { email: true }
+        });
+        
+        const existingEmails = new Set(existingSuppliers.map(s => s.email.toLowerCase()));
+        const seenEmails = new Set();
+
+        const validSuppliers = validSuppliersRaw.filter(s => {
+            const email = s.email.toLowerCase();
+            if (existingEmails.has(email) || seenEmails.has(email)) return false;
+            seenEmails.add(email);
+            return true;
+        }).map(s => ({
             name: s.name,
             email: s.email,
             phone: s.phone || '',

@@ -14,12 +14,18 @@ export function LanguageSelector({ className }: { className?: string }) {
       setCurrentLang(lang);
       localStorage.setItem('auto_translate_lang', lang);
       
+      const hostname = window.location.hostname;
+      const baseDomain = hostname.split('.').length > 2 ? hostname.split('.').slice(1).join('.') : hostname;
+
       if (lang === 'en') {
           document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${hostname};`;
+          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${hostname};`;
+          document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${baseDomain};`;
       } else {
           document.cookie = `googtrans=/en/${lang}; path=/`;
-          document.cookie = `googtrans=/en/${lang}; path=/; domain=${window.location.hostname}`;
+          document.cookie = `googtrans=/en/${lang}; path=/; domain=${hostname}`;
+          document.cookie = `googtrans=/en/${lang}; path=/; domain=.${hostname}`;
       }
       
       window.location.reload();

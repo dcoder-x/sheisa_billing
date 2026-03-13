@@ -60,8 +60,12 @@ export function AutoTranslator() {
        const timer = setTimeout(() => {
           const combo = document.querySelector('.goog-te-combo') as HTMLSelectElement;
           if (combo) {
-             combo.value = savedLang;
+             combo.value = 'en';
              combo.dispatchEvent(new Event('change', { bubbles: true }));
+             setTimeout(() => {
+               combo.value = savedLang;
+               combo.dispatchEvent(new Event('change', { bubbles: true }));
+             }, 50);
           }
        }, 300);
        return () => clearTimeout(timer);
@@ -115,6 +119,7 @@ export function AutoTranslator() {
                     if (lang !== 'en') {
                         document.cookie = `googtrans=/en/${lang}; path=/`;
                         document.cookie = `googtrans=/en/${lang}; path=/; domain=${window.location.hostname}`;
+                        document.cookie = `googtrans=/en/${lang}; path=/; domain=.${window.location.hostname}`;
                         window.location.reload();
                         return;
                     }
@@ -133,6 +138,7 @@ export function AutoTranslator() {
           if (browserLang !== 'en') {
               document.cookie = `googtrans=/en/${browserLang}; path=/`;
               document.cookie = `googtrans=/en/${browserLang}; path=/; domain=${window.location.hostname}`;
+              document.cookie = `googtrans=/en/${browserLang}; path=/; domain=.${window.location.hostname}`;
               window.location.reload();
               return;
           }
